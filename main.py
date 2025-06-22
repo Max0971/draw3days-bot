@@ -1,30 +1,26 @@
-from flask import Flask
-from threading import Thread
+import logging
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
+# Увімкнення логів
+logging.basicConfig(level=logging.INFO)
+
+# Токен бота
 TOKEN = "7240793453:AAFu5f4ArOokx2knYlF8JLoSJFbc0tO8WvU"
 
-# Flask
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return "Bot is running!", 200
-
-# Telegram handler
+# Обробник команди /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Бот активний! ✅")
+    await update.message.reply_text("Привіт! Я працюю 🎉")
 
-def run_bot():
-    import asyncio
-    async def main():
-        application = Application.builder().token(TOKEN).build()
-        application.add_handler(CommandHandler("start", start))
-        await application.run_polling()
-
-    asyncio.run(main())
+# Основна функція запуску
+def main():
+    app = Application.builder().token(TOKEN).build()
+    
+    # Додаємо команду /start
+    app.add_handler(CommandHandler("start", start))
+    
+    # Запускаємо бота
+    app.run_polling()
 
 if __name__ == "__main__":
-    Thread(target=run_bot).start()
-    app.run(host="0.0.0.0", port=10000)
+    main()
