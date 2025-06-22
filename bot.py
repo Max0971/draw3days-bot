@@ -15,3 +15,12 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+from telegram.error import Conflict
+
+try:
+    app.run_polling()
+except Conflict:
+    print("⚠️ Бот вже запущений! Зупиніть інший екземпляр.")
+except Exception as e:
+    print(f"Помилка: {e}")
