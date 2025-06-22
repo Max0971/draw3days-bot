@@ -5,7 +5,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.error import Conflict
 import os
 
-TOKEN = os.getenv("TELEGRAM_TOKEN")  # Безпечніше — витягувати токен з середовища
+TOKEN = "7240793453:AAFu5f4ArOokx2knYlF8JLoSJFbc0tO8WvU"
 
 # === Telegram bot logic ===
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -29,11 +29,6 @@ def health_check():
     return "Bot is running", 200
 
 if __name__ == '__main__':
-    # Запускаємо бота в окремому потоці
     bot_thread = threading.Thread(target=run_bot)
     bot_thread.start()
-
-    # Flask працює на 0.0.0.0, порт 10000 — Render його виявить
-    app.run(host='0.0.0.0', port=10000)
-
     app.run(host='0.0.0.0', port=10000)
