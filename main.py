@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 import asyncio
 
-TOKEN = "ТУТ_ВАШ_ТОКЕН_БОТА"
+TOKEN = "7240793453:AAFu5f4ArOokx2knYlF8JLoSJFbc0tO8WvU"
 
 app = Flask(__name__)
 
