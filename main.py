@@ -20,14 +20,8 @@ def run_bot():
     async def main():
         application = Application.builder().token(TOKEN).build()
         application.add_handler(CommandHandler("start", start))
-        await application.run_polling()  # Запускаємо бот (працює вічно)
 
-    asyncio.run(main())
-
-if __name__ == "__main__":
-    # Запускаємо Telegram-бота у фоновому потоці
-    bot_thread = Thread(target=run_bot)
-    bot_thread.start()
-
-    # Запускаємо Flask у головному потоці
-    app.run(host="0.0.0.0", port=10000)
+        await application.initialize()
+        await application.start()
+        await application.updater.start_polling()
+        await application.u
