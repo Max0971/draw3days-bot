@@ -2,7 +2,7 @@ import os
 import logging
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import ApplicationBuilder
 
 # Налаштування логів
 logging.basicConfig(level=logging.INFO)
@@ -15,7 +15,7 @@ TOKEN = os.getenv("BOT_TOKEN")
 RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
 
 # Створюємо Telegram Application
-application = ApplicationBuilder().token(TOKEN).build()
+application = ApplicationBuilder().token("YOUR_TOKEN").pool_timeout(30).connect_timeout(30).build()
 
 # Команда /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
