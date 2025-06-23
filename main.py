@@ -25,3 +25,14 @@ def run_bot():
         await application.start()
         await application.updater.start_polling()
         await application.u
+if __name__ == "__main__":
+    # Запускаємо Telegram-бота у фоновому потоці
+    bot_thread = Thread(target=run_bot)
+    bot_thread.start()
+
+    # Отримуємо порт з оточення (для Render)
+    import os
+    port = int(os.environ.get("PORT", 10000))
+
+    # Запускаємо Flask у головному потоці
+    app.run(host="0.0.0.0", port=port)
