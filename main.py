@@ -4,8 +4,9 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 import os
 import asyncio
 
-TOKEN = os.getenv("BOT_TOKEN") or "7240793453:AAFu5f4ArOokx2knYlF8JLoSJFbc0tO8WvU"
+TOKEN = os.getenv("BOT_TOKEN") or "YOUR_REAL_TOKEN"
 WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", "webhook")
+WEBHOOK_URL = f"https://draw3days-bot.onrender.com/{WEBHOOK_PATH}"
 
 app = Flask(__name__)
 application = Application.builder().token(TOKEN).concurrent_updates(True).build()
@@ -21,19 +22,22 @@ def home():
     return "Бот працює! ✅", 200
 
 @app.route(f"/{WEBHOOK_PATH}", methods=["POST"])
-async def webhook():
-    update = Update.de_json(request.get_json(force=True), application.bot)
-    await application.process_update(update)
+def webhook():
+    """Обробка вебхуку (викликає асинхронну функцію у фоновому режимі)."""
+    json_data = request.get_json(force=True)
+    update = Update.de_json(json_data, application.bot)
+    asyncio.create_task(application.process_update(update))
     return "ok", 200
 
+async def setup_webhook():
+    await application.initialize()
+    await application.bot.set_webhook(WEBHOOK_URL)
+    print(f"Webhook встановлено: {WEBHOOK_URL}")
+    await application.start()  # потрібен для коректної роботи webhook
+    # application.run_polling() не викликаємо, бо ми використовуємо webhook
+
+# Піднімаємо все разом
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    url = f"https://draw3days-bot.onrender.com/{WEBHOOK_PATH}"
-
-    async def main():
-        await application.initialize()
-        await application.bot.set_webhook(url)
-        print(f"Webhook встановлено: {url}")
-
-    asyncio.run(main())
-    app.run(host="0.0.0.0", port=port)
+    loop = asyncio.get_event_loop()
+    loop.create_task(setup_webhook())
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
