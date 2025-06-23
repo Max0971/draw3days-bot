@@ -21,6 +21,11 @@ application = ApplicationBuilder().token("YOUR_TOKEN").pool_timeout(30).connect_
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Привіт! Я бот, який працює через Render.")
 
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
+    if isinstance(context.error, telegram.error.TimedOut):
+        await asyncio.sleep(5)
+        await update.message.reply_text("Будь ласка, спробуйте ще раз")
+
 # Додаємо хендлер
 application.add_handler(CommandHandler("start", start))
 
