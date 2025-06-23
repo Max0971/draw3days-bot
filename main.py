@@ -2,49 +2,40 @@ from flask import Flask, request
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 import os
-import asyncio
 
-# Отримуємо токен і шлях до вебхука
-TOKEN = os.getenv("BOT_TOKEN") or "PASTE_YOUR_BOT_TOKEN_HERE"
-WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", "webhook")
-WEBHOOK_URL = f"https://draw3days-bot.onrender.com/{WEBHOOK_PATH}"
+TOKEN = os.getenv("BOT_TOKEN")  # Переконайся, що в Render додано BOT_TOKEN
 
-# Ініціалізація Flask та Telegram Application
+# Ініціалізація Flask
 app = Flask(__name__)
-application = Application.builder().token(TOKEN).concurrent_updates(True).build()
 
-# Обробник команди /start
+# Ініціалізація Telegram Application
+application = Application.builder().token(TOKEN).build()
+
+# Команда /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Бот активний! ✅")
+    await update.message.reply_text("Привіт! Я працюю.")
 
-# Додаємо обробник до Telegram Application
 application.add_handler(CommandHandler("start", start))
 
-# Головна сторінка (для перевірки)
-@app.route("/", methods=["GET"])
-def home():
-    return "Бот працює! ✅", 200
+# Flask endpoint для webhook
+@app.route(f"/{TOKEN}", methods=["POST"])
+async def webhook():
+    data = request.get_json(force=True)
+    update = Update.de_json(data, application.bot)
+    await application.process_update(update)
+    return "ok"
 
-# Обробник для Telegram Webhook
-@app.route(f"/{WEBHOOK_PATH}", methods=["POST"])
-def webhook():
-    """Отримання Telegram update і передача до application."""
-    json_data = request.get_json(force=True)
-    update = Update.de_json(json_data, application.bot)
-    asyncio.create_task(application.process_update(update))
-    return "ok", 200
-
-# Ініціалізація бота і встановлення вебхуку
-async def setup_webhook():
-    await application.initialize()
-    await application.bot.set_webhook(WEBHOOK_URL)
-    await application.start()
-    print(f"✅ Webhook встановлено: {WEBHOOK_URL}")
-
-# Запуск Flask + Telegram Application
+# Запуск Flask сервера
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(setup_webhook())
+    import asyncio
 
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    # Встановлюємо webhook
+    async def main():
+        await application.bot.set_webhook(f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}/{TOKEN}")
+        print("Webhook встановлено")
+        await application.initialize()
+        await application.start()
+        await application.updater.start_polling()  # Не запускає polling, просто треба для start()
+
+    asyncio.run(main())
+    app.run(host="0.0.0.0", port=10000)  # Render запускає на 0.0.0.0
